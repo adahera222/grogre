@@ -168,11 +168,13 @@
      <Compile Include="Assets\Scripts\EnemyScript.cs" />
      <Compile Include="Assets\Scripts\ForwardButton.cs" />
      <Compile Include="Assets\Scripts\Gregor.cs" />
+     <Compile Include="Assets\Scripts\HitManager.cs" />
      <Compile Include="Assets\Scripts\LeftButtonScript.cs" />
      <Compile Include="Assets\Scripts\MapManager.cs" />
      <Compile Include="Assets\Scripts\NotificationManager.cs" />
      <Compile Include="Assets\Scripts\PrizeScript.cs" />
      <Compile Include="Assets\Scripts\RightButtonScript.cs" />
+     <Compile Include="Assets\Scripts\StartButton.cs" />
      <Compile Include="Assets\Scripts\TraitOverlay.cs" />
      <Compile Include="Assets\Scripts\UpButton.cs" />
      <Compile Include="Assets\iTween\Plugins\iTween.cs" />

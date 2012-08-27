@@ -59,7 +59,7 @@ public class Prize {
 				Gregor.shared.grantHealth(2);
 				break;
 			case RewardType.TRAP:
-				Gregor.shared.grantHealth(-2);
+				Gregor.shared.Hit(2);
 				break;
 			default:
 				Debug.LogWarning(string.Format("Unimplemented reward {0}", m_reward));
@@ -100,38 +100,44 @@ public class Monster {
 		m_type = type;
 		switch (type) {
 		case BaddyType.SLIME:
-			healthPoints = 5.0f;
-			attackPower = 1.0f;
+			healthPoints = 5.0f * (1 + Gregor.shared.growthStage);
+			attackPower = 3.0f * (1 + Gregor.shared.growthStage);
 			armor = 1.0f;
-			m_xp = 1.0f;
+			m_xp = 1.0f * (1 + Gregor.shared.growthStage);
 			break;
 		case BaddyType.GHOST:
-			healthPoints = 10.0f;
-			attackPower = 2.0f;
+			healthPoints = 10.0f * (1 + Gregor.shared.growthStage);
+			attackPower = 5.0f * (1 + Gregor.shared.growthStage);
 			armor = 1.1f;
-			m_xp = 1.0f;
+			m_xp = 1.0f * (1 + Gregor.shared.growthStage);
 			break;
 		case BaddyType.RODENT:
-			healthPoints = 18.0f;
-			attackPower = 5.0f;
+			healthPoints = 18.0f * (1 + Gregor.shared.growthStage);
+			attackPower = 10.0f * (1 + Gregor.shared.growthStage);
 			armor = 1.2f;
-			m_xp = 2.0f;
+			m_xp = 2.0f * (1 + Gregor.shared.growthStage);
 			break;
 		case BaddyType.DRAGON:
-			healthPoints = 50.0f;
-			attackPower = 10.0f;
+			healthPoints = 50.0f * (1 + Gregor.shared.growthStage);
+			attackPower = 20.0f * (1 + Gregor.shared.growthStage);
 			armor = 1.4f;
-			m_xp = 3.0f;
+			m_xp = 3.0f * (1 + Gregor.shared.growthStage);
 			break;
 		default:
 			Debug.LogWarning("Invalid monster type");
 			break;
 		}
 	}
+	
+	public int Provoke() {
+		float damageModifier = 1.0f - Mathf.Pow ( Random.value, 2);
+		return (int)(damageModifier * attackPower);
+	}
 		
 	public void Hit(int hitPoints) {
 		float damage = (float)hitPoints / armor;
 		healthPoints -= damage;
+		HitManager.shared.showEnemyDamage((int)damage);
 		
 		if (healthPoints <= 0.0f) {
 			Debug.Log(string.Format("Monster of type {0} dead", m_type));
@@ -205,13 +211,13 @@ public class MapRoom {
 		if (m_hasPrize) {
 			NotificationManager.shared.QueueNote(new Notification((PrizeType)m_prize));
 			ButtonManager.shared.showRightButton("ok");
-			ButtonManager.shared.hideButton(GameObject.FindGameObjectWithTag("LeftButton"));
+			ButtonManager.shared.showLeftButton("chill");
 			return;
 		}
 		if (!m_hasBaddy && !m_hasPrize) {
 			NotificationManager.shared.DismissNote();
 			ButtonManager.shared.hideButton(GameObject.FindGameObjectWithTag("RightButton"));
-			ButtonManager.shared.hideButton(GameObject.FindGameObjectWithTag("LeftButton"));
+			ButtonManager.shared.showLeftButton("chill");
 			return;
 		}
 	}

@@ -14,8 +14,10 @@ public class RightButtonScript : ButtonScript {
 	void Update () {
 		if (IsClickingUp()) {
 			MapRoom room = Gregor.shared.currentRoom;
-			if (room.hasBaddy)
-				room.monster.Hit(1);
+			if (room.hasBaddy) {
+				room.monster.Hit(Gregor.shared.level*2 + 1);
+				Gregor.shared.Hit(room.monster.Provoke());
+			}
 			else if (room.hasPrize && room.prize.canCollect)
 				room.prize.Collect();
 			else 

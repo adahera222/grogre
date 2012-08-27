@@ -13,7 +13,11 @@ public class LeftButtonScript : ButtonScript {
 	// Update is called once per frame
 	void Update () {
 		if (IsClickingUp()) {
-			Gregor.shared.runAway();
+			MapRoom room = Gregor.shared.currentRoom;
+			if (room.hasBaddy)
+				Gregor.shared.runAway();
+			else
+				Gregor.shared.grantHealth(5);
 		}
 	}
 }

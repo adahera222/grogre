@@ -44,6 +44,7 @@ public class Gregor : CharacterScript {
 	public int defLevel { get{ return m_defLevel; } }
 	public int strongLevel { get{ return m_strongLevel; } }
 	public int brainsLevel { get{ return m_brainsLevel; } }
+	public int level { get{ return m_level; } }
 	
 	
 	// Use this for initialization
@@ -68,12 +69,15 @@ public class Gregor : CharacterScript {
 		m_level = 0;
 		m_xp = 0;
 		evolChoices = new ArrayList(1);
+		healthPoints = 20;
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		if (returning) {
-			returning = false;			
+			returning = false;
+			updateXP();
+			updateHealth();
 			updateGregor();
 			updateOverlays();
 			unHide();
@@ -142,6 +146,9 @@ public class Gregor : CharacterScript {
 	
 	public void grantHealth(int hp) {
 		healthPoints += hp;
+		if (healthPoints > 99.0f) healthPoints = 99.0f;
+		HitManager.shared.showGregorDelta(hp);
+		updateHealth();
 	}
 	public void grantDef(float def) {
 		armor += def;
@@ -152,6 +159,8 @@ public class Gregor : CharacterScript {
 	
 	public void grantXP(int xp) {
 		m_xp += xp;
+		if (m_xp > 99) m_xp = 99;
+		updateXP();
 		//Debug.Log(string.Format("Adding {0} xp", xp));
 		if (m_xp > m_levelThreshold) {
 			//Debug.LogWarning("Leveling Up!");
@@ -168,6 +177,39 @@ public class Gregor : CharacterScript {
 			m_levelThreshold += m_level+1;
 			Application.LoadLevel("evolveScene");
 		}
+	}
+	
+	public void Hit(int damage) {
+		HitManager.shared.showGregorDelta(damage*-1);
+		healthPoints -= damage;
+		updateHealth();
+	}
+	
+	void updateHealth() {
+		if (healthPoints <= 0) healthPoints = 20;
+		
+		int ones = (int)healthPoints % 10;
+		int tens = (int)healthPoints / 10;
+		if (tens == 0) {
+			GameObject.FindGameObjectWithTag("HPTens").transform.position = new Vector3(1000.0f, 0.0f, 0.0f);
+		} else {
+			OT.Sprite("hp-tens").image = (Texture)Resources.Load(string.Format("Numbers/tens-{0}", tens));
+			GameObject.FindGameObjectWithTag("HPTens").transform.position = GameObject.FindGameObjectWithTag("HPOnes").transform.position;
+		}
+		OT.Sprite("hp-ones").image = (Texture)Resources.Load(string.Format("Numbers/ones-{0}", ones));
+	}
+	
+	void updateXP() {
+		int ones = m_xp % 10;
+		int tens = m_xp / 10;
+		if (tens == 0) {
+			GameObject.FindGameObjectWithTag("XPTens").transform.position = new Vector3(1000.0f, 0.0f, 0.0f);
+		} else {
+			if (tens > 9) tens = 9;
+			OT.Sprite("xp-tens").image = (Texture)Resources.Load(string.Format("Numbers/tens-{0}", tens));
+			GameObject.FindGameObjectWithTag("XPTens").transform.position = GameObject.FindGameObjectWithTag("XPOnes").transform.position;
+		}
+		OT.Sprite("xp-ones").image = (Texture)Resources.Load(string.Format("Numbers/ones-{0}", ones));
 	}
 	
 	void startNewPhase() {
@@ -200,13 +242,13 @@ public class Gregor : CharacterScript {
 		OTSprite evol = OT.Sprite("Gregor");
 		string phase = "Teen";
 		if (m_level >= 8) phase = "Adult";
-		if ((EvolChoice)evolChoices[m_level-1] == EvolChoice.def) {
+		if ((EvolChoice)evolChoices[growthStage*4-1] == EvolChoice.def) {
 			evol.image = (Texture)Resources.Load(string.Format("Gregor/{0}/{1}", phase, string.Format("def{0}", phase.ToLower())));
 		}
-		if ((EvolChoice)evolChoices[m_level-1] == EvolChoice.strong) {
+		if ((EvolChoice)evolChoices[growthStage*4-1] == EvolChoice.strong) {
 			evol.image = (Texture)Resources.Load(string.Format("Gregor/{0}/{1}", phase, string.Format("strong{0}", phase.ToLower())));
 		}
-		if ((EvolChoice)evolChoices[m_level-1] == EvolChoice.brains) {
+		if ((EvolChoice)evolChoices[growthStage*4-1] == EvolChoice.brains) {
 			evol.image = (Texture)Resources.Load(string.Format("Gregor/{0}/{1}", phase, string.Format("brains{0}", phase.ToLower())));
 		}
 		if (m_level == 4 || m_level == 8) {
