@@ -64,7 +64,7 @@ public class Gregor : CharacterScript {
 		m_brainsLevel = 0;
 		m_growth = GrowthStage.BABY;
 		m_keyCount = 0;
-		m_levelThreshold = 10;
+		m_levelThreshold = 2;
 		m_level = 0;
 		m_xp = 0;
 		evolChoices = new ArrayList(1);
@@ -73,7 +73,8 @@ public class Gregor : CharacterScript {
 	// Update is called once per frame
 	void Update () {
 		if (returning) {
-			returning = false;
+			returning = false;			
+			updateGregor();
 			updateOverlays();
 			unHide();
 		}
@@ -156,45 +157,83 @@ public class Gregor : CharacterScript {
 			//Debug.LogWarning("Leveling Up!");
 			hide();
 			m_level++;
-			m_levelThreshold += 10 * m_level;
+			if (m_level == 4) {
+				m_growth = GrowthStage.TEEN;
+				startNewPhase();
+			}
+			if (m_level == 8) {
+				m_growth = GrowthStage.ADULT;
+				startNewPhase();
+			}
+			m_levelThreshold += m_level+1;
 			Application.LoadLevel("evolveScene");
 		}
+	}
+	
+	void startNewPhase() {
+		m_xLocation = 0;
+		m_yLocation = 0;
+		m_defLevel = 0;
+		m_strongLevel = 0;
+		m_brainsLevel = 0;
 	}
 	
 	public void evolveTrait(string traitTag) {
 		Debug.Log (string.Format ("Sprite Tagged: {0}", string.Format("GregorEvol{0}", m_level)));
 		
-		if (traitTag == "DefSprite") {
+		if (traitTag == "Def") {
 			m_defLevel++;
 			evolChoices.Add(EvolChoice.def);
 		}
-		if (traitTag == "StrongSprite") {
+		if (traitTag == "Strong") {
 			m_strongLevel++;
 			evolChoices.Add(EvolChoice.strong);
 		}
-		if (traitTag == "BrainsSprite") {
+		if (traitTag == "Brains") {
 			m_brainsLevel++;
 			evolChoices.Add(EvolChoice.brains);
 		}
-		
+	}
+	
+	void updateGregor() {
+		if (m_level < 4) return;
+		OTSprite evol = OT.Sprite("Gregor");
+		string phase = "Teen";
+		if (m_level >= 8) phase = "Adult";
+		if ((EvolChoice)evolChoices[m_level-1] == EvolChoice.def) {
+			evol.image = (Texture)Resources.Load(string.Format("Gregor/{0}/{1}", phase, string.Format("def{0}", phase.ToLower())));
+		}
+		if ((EvolChoice)evolChoices[m_level-1] == EvolChoice.strong) {
+			evol.image = (Texture)Resources.Load(string.Format("Gregor/{0}/{1}", phase, string.Format("strong{0}", phase.ToLower())));
+		}
+		if ((EvolChoice)evolChoices[m_level-1] == EvolChoice.brains) {
+			evol.image = (Texture)Resources.Load(string.Format("Gregor/{0}/{1}", phase, string.Format("brains{0}", phase.ToLower())));
+		}
+		if (m_level == 4 || m_level == 8) {
+			startNewPhase();
+		}
 	}
 	
 	void updateOverlays() {
+		if (m_level == 4 || m_level == 8) return;
 		int defCount = 1;
 		int strongCount = 1;
 		int brainsCount = 1;
-		for (int i = 0; i < evolChoices.Count; i++) {
-			OTSprite evol = OT.Sprite(string.Format("GregorEvol{0}", i+1));
+		string phase = "Baby";
+		if (m_level > 4) phase = "Teen";
+		if (m_level > 8) phase = "Adult";
+		for (int i = 0 + growthStage*4; i < evolChoices.Count; i++) {
+			OTSprite evol = OT.Sprite(string.Format("GregorEvol{0}", (i%4)+1));
 			if ((EvolChoice)evolChoices[i] == EvolChoice.def) {
-				evol.image = (Texture)Resources.Load(string.Format("Gregor/Baby/{0}", string.Format("baby-def-{0}", defCount)));
+				evol.image = (Texture)Resources.Load(string.Format("Gregor/{0}/{1}", phase, string.Format("{1}-def-{0}", defCount, phase.ToLower())));
 				defCount++;
 			}
 			if ((EvolChoice)evolChoices[i] == EvolChoice.strong) {
-				evol.image = (Texture)Resources.Load(string.Format("Gregor/Baby/{0}", string.Format("baby-strong-{0}", strongCount)));
+				evol.image = (Texture)Resources.Load(string.Format("Gregor/{0}/{1}", phase, string.Format("{1}-strong-{0}", strongCount, phase.ToLower())));
 				strongCount++;
 			}
 			if ((EvolChoice)evolChoices[i] == EvolChoice.brains) {
-				evol.image = (Texture)Resources.Load(string.Format("Gregor/Baby/{0}", string.Format("baby-brains-{0}", brainsCount)));
+				evol.image = (Texture)Resources.Load(string.Format("Gregor/{0}/{1}", phase, string.Format("{1}-brains-{0}", brainsCount, phase.ToLower())));
 				brainsCount++;
 			}
 		}

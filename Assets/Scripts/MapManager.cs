@@ -91,7 +91,10 @@ public class Monster {
 	protected float healthPoints;
 	protected float attackPower;
 	protected float armor;
+	protected float m_xp;
 	protected BaddyType m_type;
+	
+	public float xp { get{ return m_xp; } }
 	
 	public Monster(BaddyType type) {
 		m_type = type;
@@ -100,21 +103,25 @@ public class Monster {
 			healthPoints = 5.0f;
 			attackPower = 1.0f;
 			armor = 1.0f;
+			m_xp = 1.0f;
 			break;
 		case BaddyType.GHOST:
 			healthPoints = 10.0f;
 			attackPower = 2.0f;
 			armor = 1.1f;
+			m_xp = 1.0f;
 			break;
 		case BaddyType.RODENT:
 			healthPoints = 18.0f;
 			attackPower = 5.0f;
 			armor = 1.2f;
+			m_xp = 2.0f;
 			break;
 		case BaddyType.DRAGON:
 			healthPoints = 50.0f;
 			attackPower = 10.0f;
 			armor = 1.4f;
+			m_xp = 3.0f;
 			break;
 		default:
 			Debug.LogWarning("Invalid monster type");
@@ -128,7 +135,7 @@ public class Monster {
 		
 		if (healthPoints <= 0.0f) {
 			Debug.Log(string.Format("Monster of type {0} dead", m_type));
-			Gregor.shared.grantXP(10);
+			Gregor.shared.grantXP((int)m_xp);
 			Gregor.shared.currentRoom.clearRoom();
 		}
 	}
